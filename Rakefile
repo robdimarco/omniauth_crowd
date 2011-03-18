@@ -15,13 +15,14 @@ Jeweler::Tasks.new do |gem|
   gem.name = "omniauth_crowd"
   gem.homepage = "http://github.com/robdimarco/omniauth_crowd"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.summary = %Q{An OmniAuth provider for Atlassian Crowd REST API}
+  gem.description = %Q{This is an OmniAuth provider for Atlassian Crowd's REST API.  It allows you to easily integrate your Rack application in with Atlassian Crowd.}
   gem.email = "rob@innovationontherun.com"
   gem.authors = ["Rob Di Marco"]
   # Include your dependencies below. Runtime dependencies are required when using your gem,
   # and development dependencies are only needed for development (ie running rake tasks, tests, etc)
-  #  gem.add_runtime_dependency 'jabber4r', '> 0.1'
+  gem.add_runtime_dependency 'oa-core'
+  gem.add_runtime_dependency 'nokogiri'
   #  gem.add_development_dependency 'rspec', '> 1.2.3'
 end
 Jeweler::RubygemsDotOrgTasks.new
