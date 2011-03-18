@@ -17,9 +17,9 @@ The omniauth_crowd library is an OmniAuth provider that supports authentication 
 
 === 2. You will need to configure OmniAuth to use your crowd authentication.  This is generally done in Rails in the config/initializers/omniauth.rb with...
 
-Rails.application.config.middleware.use OmniAuth::Builder do
-  provider :crowd, :crowd_server_url=>"https://crowd.mycompanyname.com/crowd", :application_name=>"app", :application_password=>"password"
-end
+  Rails.application.config.middleware.use OmniAuth::Builder do
+    provider :crowd, :crowd_server_url=>"https://crowd.mycompanyname.com/crowd", :application_name=>"app", :application_password=>"password"
+  end
 
 You will need to supply the correct server URL, application name and password
 
