@@ -31,6 +31,7 @@ module OmniAuth
 
       def callback_phase 
         creds = session.delete 'omniauth.crowd'
+        return fail!(:no_credentials, 'No Credentials') unless creds
         validator = CrowdValidator.new(@configuration, creds['username'], creds['password'])
         @user_info = validator.user_info
         
