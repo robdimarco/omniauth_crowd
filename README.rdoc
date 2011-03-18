@@ -1,6 +1,26 @@
 = omniauth_crowd
 
-Description goes here.
+The omniauth_crowd library is an OmniAuth provider that supports authentication against Atlassian Crowd REST apis.
+
+== Helpful links
+
+*	<b>Documentation:</b> http://github.com/robdimarco/omniauth_crowd
+*	<b>OmniAuth:</b> https://github.com/intridea/omniauth/
+*   <b>Atlassian Crowd:</b> http://www.atlassian.com/software/crowd/
+*   <b>Atlassian Crowd REST API:</b> http://confluence.atlassian.com/display/CROWDDEV/Crowd+REST+APIs
+
+== Install and use
+
+=== 1. Add the Authlogic Crowd REST plugin to your Gemfile
+  gem "omniauth_crowd"
+
+=== 2. You will need to configure OmniAuth to use your crowd authentication.  This is generally done in Rails in the config/initializers/omniauth.rb with...
+
+Rails.application.config.middleware.use OmniAuth::Builder do
+  provider :crowd, :crowd_server_url=>"https://crowd.mycompanyname.com/crowd", :application_name=>"app", :application_password=>"password"
+end
+
+You will need to supply the correct server URL, application name and password
 
 == Contributing to omniauth_crowd
  
