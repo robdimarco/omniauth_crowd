@@ -1,4 +1,5 @@
 require 'nokogiri'
+require 'net/http'
 
 module OmniAuth
   module Strategies
