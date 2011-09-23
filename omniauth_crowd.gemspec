@@ -4,14 +4,14 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{omniauth_crowd}
-  s.version = "1.0.0"
+  s.name = "omniauth_crowd"
+  s.version = "1.0.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Rob Di Marco"]
-  s.date = %q{2011-03-18}
-  s.description = %q{This is an OmniAuth provider for Atlassian Crowd's REST API.  It allows you to easily integrate your Rack application in with Atlassian Crowd.}
-  s.email = %q{rob@innovationontherun.com}
+  s.date = "2011-09-23"
+  s.description = "This is an OmniAuth provider for Atlassian Crowd's REST API.  It allows you to easily integrate your Rack application in with Atlassian Crowd."
+  s.email = "rob@innovationontherun.com"
   s.extra_rdoc_files = [
     "LICENSE.txt",
     "README.rdoc"
@@ -28,15 +28,16 @@ Gem::Specification.new do |s|
     "lib/omniauth/strategies/crowd.rb",
     "lib/omniauth/strategies/crowd/configuration.rb",
     "lib/omniauth/strategies/crowd/crowd_validator.rb",
+    "omniauth_crowd.gemspec",
     "spec/fixtures/success.xml",
     "spec/omniauth/strategies/crowd_spec.rb",
     "spec/spec_helper.rb"
   ]
-  s.homepage = %q{http://github.com/robdimarco/omniauth_crowd}
+  s.homepage = "http://github.com/robdimarco/omniauth_crowd"
   s.licenses = ["MIT"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.6.0}
-  s.summary = %q{An OmniAuth provider for Atlassian Crowd REST API}
+  s.rubygems_version = "1.8.10"
+  s.summary = "An OmniAuth provider for Atlassian Crowd REST API"
   s.test_files = [
     "spec/omniauth/strategies/crowd_spec.rb",
     "spec/spec_helper.rb"
