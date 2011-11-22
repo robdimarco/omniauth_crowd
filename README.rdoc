@@ -11,9 +11,9 @@ The omniauth_crowd library is an OmniAuth provider that supports authentication 
 
 == Install and use
 
-=== 1. Add the Authlogic Crowd REST plugin to your Gemfile
+=== 1. Add the OmniAuth Crowd REST plugin to your Gemfile
   gem 'oa-core'  # We depend on this
-  gem "omniauth_crowd", :require=>'omniauth/crowd' # Need the require to bring in the right files
+  gem "omniauth_crowd"
 
 === 2. You will need to configure OmniAuth to use your crowd authentication.  This is generally done in Rails in the config/initializers/omniauth.rb with...
 
