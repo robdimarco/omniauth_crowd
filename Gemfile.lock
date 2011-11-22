@@ -1,17 +1,21 @@
+PATH
+  remote: .
+  specs:
+    omniauth_crowd (2.0.0)
+      nokogiri (>= 1.4.4)
+      omniauth (~> 1.0)
+
 GEM
   remote: http://rubygems.org/
   specs:
     addressable (2.2.4)
     crack (0.1.8)
     diff-lcs (1.1.2)
-    git (1.2.5)
-    jeweler (1.5.2)
-      bundler (~> 1.0.0)
-      git (>= 1.2.5)
-      rake
-    nokogiri (1.4.4)
-    oa-core (0.2.0)
-      rack (~> 1.1)
+    hashie (1.2.0)
+    nokogiri (1.5.0)
+    omniauth (1.0.0)
+      hashie (~> 1.2)
+      rack
     rack (1.2.2)
     rack-test (0.5.7)
       rack (>= 1.0)
@@ -33,9 +37,7 @@ PLATFORMS
 
 DEPENDENCIES
   bundler (~> 1.0.0)
-  jeweler (~> 1.5.2)
-  nokogiri
-  oa-core
+  omniauth_crowd!
   rack
   rack-test
   rake
