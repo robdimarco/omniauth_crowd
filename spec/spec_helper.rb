@@ -7,6 +7,6 @@ require 'webmock/rspec'
 include Rack::Test::Methods
 include WebMock
 
-require 'omniauth/crowd'
+require 'omniauth_crowd'
 
 WebMock.disable_net_connect!

@@ -54,7 +54,7 @@ describe OmniAuth::Strategies::Crowd, :type=>:strategy do
             auth.should be_kind_of(Hash)
           end
           it 'should have good data' do
-            auth = last_request.env['omniauth.auth']['provider'].should == 'crowd'
+            auth = last_request.env['omniauth.auth']['provider'].should == :crowd
             auth = last_request.env['omniauth.auth']['uid'].should == 'foo'
             auth = last_request.env['omniauth.auth']['user_info'].should be_kind_of(Hash)
           end
