@@ -19,7 +19,7 @@ module OmniAuth
           get_credentials
         else
           session['omniauth.crowd'] = {'username' => request['username'], 'password' => request['password']}
-          redirect callback_path
+          redirect callback_url
         end
       end
     
