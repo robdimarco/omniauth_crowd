@@ -32,7 +32,7 @@ module OmniAuth
             "email" => doc.xpath("//user/email/text()").to_s
           }
         end
-        AUTHENTICATION_REQUEST_BODY = "<password><value>%s</value></password>"
+        AUTHENTICATION_REQUEST_BODY = "<password><value><![CDATA[%s]]></value></password>"
         def is_user_authorized?
           http = Net::HTTP.new(@uri.host, @uri.port)
           http.use_ssl = @uri.port == 443 || @uri.instance_of?(URI::HTTPS)
