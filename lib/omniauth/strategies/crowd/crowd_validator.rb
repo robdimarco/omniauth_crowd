@@ -55,7 +55,6 @@ module OmniAuth
           http.start do |c|
             req = Net::HTTP::Get.new("#{@user_group_uri.path}?#{@user_group_uri.query}")
             req.basic_auth @configuration.crowd_application_name, @configuration.crowd_password
-            req.add_field 'Content-Type', 'text/xml'
             http.request(req)
           end
         end
