@@ -22,5 +22,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency(%q<rack-test>, [">= 0"])
   gem.add_development_dependency(%q<rspec>, ["~> 2.5.0"])
   gem.add_development_dependency(%q<webmock>, ["~> 1.3.4"])
-  gem.add_development_dependency(%q<bundler>, ["~> 1.0.0"])
+  gem.add_development_dependency(%q<bundler>, ["> 1.0.0"])
 end
