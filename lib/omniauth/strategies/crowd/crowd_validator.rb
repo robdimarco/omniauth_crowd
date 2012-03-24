@@ -16,26 +16,27 @@ module OmniAuth
         def user_info
           user_info_hash = retrieve_user_info!
           if user_info_hash && @configuration.include_users_groups?
-            add_user_groups(user_info_hash)
+            user_info_hash = add_user_groups!(user_info_hash)
           else
-            nil
+            user_info_hash
           end
+          user_info_hash
         end
 
         private
-        def add_user_groups(user_info_hash)
-          response, body = make_user_group_request
-          unless response.code.to_i != 200 || body.nil? || body == '' 
-            doc = Nokogiri::XML(body)
+        def add_user_groups!(user_info_hash)
+          response = make_user_group_request
+          unless response.code.to_i != 200 || response.body.nil? || response.body == '' 
+            doc = Nokogiri::XML(response.body)
             user_info_hash["groups"] = doc.xpath("//groups/group/@name").map(&:to_s)
           end
           user_info_hash
         end
         
         def retrieve_user_info!
-          response, body = make_authorization_request
-          unless response.code.to_i != 200 || body.nil? || body == '' 
-            doc = Nokogiri::XML(body)
+          response = make_authorization_request
+          unless response.code.to_i != 200 || response.body.nil? || response.body == '' 
+            doc = Nokogiri::XML(response.body)
             {
               "user" => doc.xpath("//user/@name").to_s,
               "name" => doc.xpath("//user/display-name/text()").to_s,
