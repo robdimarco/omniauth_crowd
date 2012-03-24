@@ -26,7 +26,7 @@ describe OmniAuth::Strategies::Crowd, :type=>:strategy do
 
       it 'should redirect to callback' do
         last_response.should be_redirect
-        last_response.headers['Location'].should == '/auth/crowd/callback'
+        last_response.headers['Location'].should == 'http://example.org/auth/crowd/callback'
       end
     end
 
@@ -44,6 +44,8 @@ describe OmniAuth::Strategies::Crowd, :type=>:strategy do
         before do
           stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/authentication?username=foo").
             to_return(:body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'success.xml')))
+          stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/user/group/direct?username=foo").
+            to_return(:body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'groups.xml')))
           get '/auth/crowd/callback', nil, 'rack.session'=>{'omniauth.crowd'=> {"username"=>"foo", "password"=>"ba"}}
         end
         it 'should call through to the master app' do
@@ -57,6 +59,7 @@ describe OmniAuth::Strategies::Crowd, :type=>:strategy do
             auth = last_request.env['omniauth.auth']['provider'].should == :crowd
             auth = last_request.env['omniauth.auth']['uid'].should == 'foo'
             auth = last_request.env['omniauth.auth']['user_info'].should be_kind_of(Hash)
+            auth = last_request.env['omniauth.auth']['user_info']['groups'].sort.should == ["Developers", "jira-users"].sort
           end
       end
 
