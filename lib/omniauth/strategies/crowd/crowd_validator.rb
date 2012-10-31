@@ -45,6 +45,8 @@ module OmniAuth
               "email" => doc.xpath("//user/email/text()").to_s
             }
           else
+            OmniAuth.logger.send(:warn, "(crowd) [retrieve_user_info!] response code: #{response.code.to_s}")
+            OmniAuth.logger.send(:warn, "(crowd) [retrieve_user_info!] response body: #{response.body}")
             nil
           end
         end
@@ -66,11 +68,19 @@ module OmniAuth
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE if http.use_ssl? && @configuration.disable_ssl_verification?
           http.start do |c|
             req = Net::HTTP::Post.new("#{@authentiction_uri.path}?#{@authentiction_uri.query}")
-            req.body = AUTHENTICATION_REQUEST_BODY % @password
+            req.body = make_authentication_request_body(@password)
             req.basic_auth @configuration.crowd_application_name, @configuration.crowd_password
             req.add_field 'Content-Type', 'text/xml'
             http.request(req)
           end
+        end
+
+        # create the body using Nokogiri so proper encoding of passwords can be ensured
+        def make_authentication_request_body(password)
+          request_body = Nokogiri::XML(AUTHENTICATION_REQUEST_BODY)
+          password_value = request_body.at_css "value"
+          password_value.content = password
+          return request_body.root.to_s # return the body without the xml header
         end
       end
     end
