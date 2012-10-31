@@ -35,6 +35,8 @@ module OmniAuth
         
         def retrieve_user_info!
           response = make_authorization_request
+          OmniAuth.logger.send(:debug, "(crowd) retrieve_user_info! response code: #{response.code.to_s}")
+          OmniAuth.logger.send(:debug, "(crowd) response body: #{response.body}")
           unless response.code.to_i != 200 || response.body.nil? || response.body == '' 
             doc = Nokogiri::XML(response.body)
             {
