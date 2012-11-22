@@ -51,6 +51,8 @@ module OmniAuth
           @crowd_application_name = options[:application_name]
           @crowd_password         = options[:application_password]
 
+          puts "Session based!" if options[:session_based]
+
           unless options.include?(:crowd_server_url) || options.include?(:crowd_authentication_url)
             raise ArgumentError.new("Either :crowd_server_url or :crowd_authentication_url MUST be provided")
           end
