@@ -71,6 +71,8 @@ describe OmniAuth::Strategies::Crowd, :type=>:strategy do
     context "when using session endpoint" do
       before do
         @session_based = true
+        stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/authentication?username=foo").
+        to_return(:body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'success.xml')))
         stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session").
         to_return(:body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'session.xml')))
         stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/user/group/direct?username=foo").
@@ -95,6 +97,7 @@ describe OmniAuth::Strategies::Crowd, :type=>:strategy do
         auth = last_request.env['omniauth.auth']['provider'].should == :crowd
         auth = last_request.env['omniauth.auth']['uid'].should == 'foo'
         auth = last_request.env['omniauth.auth']['user_info'].should be_kind_of(Hash)
+        auth = last_request.env['omniauth.auth']['user_info']['sso_token'].should == 'rtk8eMvqq00EiGn5iJCMZQ00'
         auth = last_request.env['omniauth.auth']['user_info']['groups'].sort.should == ["Developers", "jira-users"].sort
       end
     end

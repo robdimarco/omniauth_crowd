@@ -11,6 +11,7 @@ module OmniAuth
 
         alias :"disable_ssl_verification?" :disable_ssl_verification
         alias :"include_users_groups?" :include_users_groups
+        alias :"use_sessions?" :use_sessions
         
         # @param [Hash] params configuration options
         # @option params [String, nil] :crowd_server_url the Crowd server root URL; probably something like

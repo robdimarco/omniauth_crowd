@@ -6,14 +6,15 @@ module OmniAuth
   module Strategies
     class Crowd
       class CrowdValidator
+        SESSION_REQUEST_BODY = "<authentication-context>
+            <username>%s</username>
+            <password>%s</password>
+            </authentication-context>"
         AUTHENTICATION_REQUEST_BODY = "<password><value>%s</value></password>"
         def initialize(configuration, username, password)
           @configuration, @username, @password = configuration, username, password
-          @authentiction_uri = if @configuration.use_sessions
-              URI.parse(@configuration.session_url)
-            else
-              URI.parse(@configuration.authentication_url(@username))
-            end
+          @authentiction_uri = URI.parse(@configuration.authentication_url(@username))
+          @session_uri       = URI.parse(@configuration.session_url) if @configuration.use_sessions
           @user_group_uri    = @configuration.include_users_groups? ? URI.parse(@configuration.user_group_url(@username)) : nil
         end
 
@@ -24,10 +25,27 @@ module OmniAuth
           else
             user_info_hash
           end
+
+          if user_info_hash && @configuration.use_sessions?
+            user_info_hash = add_session!(user_info_hash)
+          end
+
           user_info_hash
         end
 
         private
+        def add_session!(user_info_hash)
+          response = make_session_request
+          if response.code.to_i == 200 && response.body 
+            doc = Nokogiri::XML(response.body)
+            user_info_hash["sso_token"] = doc.xpath('//token/text()').to_s
+          else
+            OmniAuth.logger.send(:warn, "(crowd) [add_session!] response code: #{response.code.to_s}")
+            OmniAuth.logger.send(:warn, "(crowd) [add_session!] response body: #{response.body}")
+          end
+          user_info_hash
+        end
+
         def add_user_groups!(user_info_hash)
           response = make_user_group_request
           unless response.code.to_i != 200 || response.body.nil? || response.body == '' 
@@ -71,7 +89,7 @@ module OmniAuth
           http.use_ssl = @authentiction_uri.port == 443 || @authentiction_uri.instance_of?(URI::HTTPS)
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE if http.use_ssl? && @configuration.disable_ssl_verification?
           http.start do |c|
-            req = Net::HTTP::Post.new(get_authentication_path)
+            req = Net::HTTP::Post.new("#{@authentiction_uri.path}?#{@authentiction_uri.query}")
             req.body = make_authentication_request_body(@password)
             req.basic_auth @configuration.crowd_application_name, @configuration.crowd_password
             req.add_field 'Content-Type', 'text/xml'
@@ -79,11 +97,16 @@ module OmniAuth
           end
         end
 
-        def get_authentication_path
-          if @configuration.use_sessions
-            @authentiction_uri.path
-          else
-            "#{@authentiction_uri.path}?#{@authentiction_uri.query}"
+        def make_session_request
+          http = Net::HTTP.new(@session_uri.host, @session_uri.port)
+          http.use_ssl = @session_uri.port == 443 || @session_uri.instance_of?(URI::HTTPS)
+          http.verify_mode = OpenSSL::SSL::VERIFY_NONE if http.use_ssl? && @configuration.disable_ssl_verification?
+          http.start do |c|
+            req = Net::HTTP::Post.new("#{@session_uri.path}")
+            req.body = make_session_request_body(@username, @password)
+            req.basic_auth @configuration.crowd_application_name, @configuration.crowd_password
+            req.add_field 'Content-Type', 'text/xml'
+            http.request(req)
           end
         end
 
@@ -93,6 +116,13 @@ module OmniAuth
           password_value = request_body.at_css "value"
           password_value.content = password
           return request_body.root.to_s # return the body without the xml header
+        end
+
+        def make_session_request_body(username,password)
+          request_body = Nokogiri::XML(SESSION_REQUEST_BODY)
+          request_body.at_css("username").content = username
+          request_body.at_css("password").content = password
+          return request_body.root.to_s
         end
       end
     end
