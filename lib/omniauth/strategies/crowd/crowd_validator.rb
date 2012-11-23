@@ -9,7 +9,11 @@ module OmniAuth
         AUTHENTICATION_REQUEST_BODY = "<password><value>%s</value></password>"
         def initialize(configuration, username, password)
           @configuration, @username, @password = configuration, username, password
-          @authentiction_uri = URI.parse(@configuration.authentication_url(@username))
+          @authentiction_uri = if @configuration.use_sessions
+              URI.parse(@configuration.session_url)
+            else
+              URI.parse(@configuration.authentication_url(@username))
+            end
           @user_group_uri    = @configuration.include_users_groups? ? URI.parse(@configuration.user_group_url(@username)) : nil
         end
 
@@ -67,11 +71,19 @@ module OmniAuth
           http.use_ssl = @authentiction_uri.port == 443 || @authentiction_uri.instance_of?(URI::HTTPS)
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE if http.use_ssl? && @configuration.disable_ssl_verification?
           http.start do |c|
-            req = Net::HTTP::Post.new("#{@authentiction_uri.path}?#{@authentiction_uri.query}")
+            req = Net::HTTP::Post.new(get_authentication_path)
             req.body = make_authentication_request_body(@password)
             req.basic_auth @configuration.crowd_application_name, @configuration.crowd_password
             req.add_field 'Content-Type', 'text/xml'
             http.request(req)
+          end
+        end
+
+        def get_authentication_path
+          if @configuration.use_sessions
+            @authentiction_uri.path
+          else
+            "#{@authentiction_uri.path}?#{@authentiction_uri.query}"
           end
         end
 

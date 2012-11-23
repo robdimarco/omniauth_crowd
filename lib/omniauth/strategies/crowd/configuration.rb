@@ -4,9 +4,10 @@ module OmniAuth
   module Strategies
     class Crowd
       class Configuration
+        DEFAULT_SESSION_URL = "%s/rest/usermanagement/latest/session"
         DEFAULT_AUTHENTICATION_URL = "%s/rest/usermanagement/latest/authentication"
         DEFAULT_USER_GROUP_URL = "%s/rest/usermanagement/latest/user/group/direct"
-        attr_reader :crowd_application_name, :crowd_password, :disable_ssl_verification, :include_users_groups
+        attr_reader :crowd_application_name, :crowd_password, :disable_ssl_verification, :include_users_groups, :use_sessions, :session_url
 
         alias :"disable_ssl_verification?" :disable_ssl_verification
         alias :"include_users_groups?" :include_users_groups
@@ -50,11 +51,15 @@ module OmniAuth
           end
           @crowd_application_name = options[:application_name]
           @crowd_password         = options[:application_password]
-
-          puts "Session based!" if options[:session_based]
+          @use_sessions           = options[:session_based]
 
           unless options.include?(:crowd_server_url) || options.include?(:crowd_authentication_url)
             raise ArgumentError.new("Either :crowd_server_url or :crowd_authentication_url MUST be provided")
+          end
+
+          if @use_sessions
+            @session_url            = options[:crowd_session_url] || DEFAULT_SESSION_URL % options[:crowd_server_url]
+            validate_is_url 'session URL', @session_url
           end
           @authentication_url     = options[:crowd_authentication_url] || DEFAULT_AUTHENTICATION_URL % options[:crowd_server_url]
           validate_is_url 'authentication URL', @authentication_url
