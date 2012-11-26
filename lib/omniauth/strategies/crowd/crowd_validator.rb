@@ -72,42 +72,31 @@ module OmniAuth
             nil
           end
         end
-        
-        def make_user_group_request
-          http = Net::HTTP.new(@user_group_uri.host, @user_group_uri.port)
-          http.use_ssl = @user_group_uri.port == 443 || @user_group_uri.instance_of?(URI::HTTPS)
+
+        def make_request(uri, body=nil)
+          http_method = body.nil? ? Net::HTTP::Get : Net::HTTP::Post
+          http = Net::HTTP.new(uri.host, uri.port)
+          http.use_ssl = uri.port == 443 || uri.instance_of?(URI::HTTPS)
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE if http.use_ssl? && @configuration.disable_ssl_verification?
           http.start do |c|
-            req = Net::HTTP::Get.new("#{@user_group_uri.path}?#{@user_group_uri.query}")
-            req.basic_auth @configuration.crowd_application_name, @configuration.crowd_password
-            http.request(req)
-          end
-        end
-        
-        def make_authorization_request 
-          http = Net::HTTP.new(@authentiction_uri.host, @authentiction_uri.port)
-          http.use_ssl = @authentiction_uri.port == 443 || @authentiction_uri.instance_of?(URI::HTTPS)
-          http.verify_mode = OpenSSL::SSL::VERIFY_NONE if http.use_ssl? && @configuration.disable_ssl_verification?
-          http.start do |c|
-            req = Net::HTTP::Post.new("#{@authentiction_uri.path}?#{@authentiction_uri.query}")
-            req.body = make_authentication_request_body(@password)
+            req = http_method.new(uri.query.nil? ? uri.path : "#{uri.path}?#{uri.query}")
+            req.body = body if body
             req.basic_auth @configuration.crowd_application_name, @configuration.crowd_password
             req.add_field 'Content-Type', 'text/xml'
             http.request(req)
           end
+        end
+        
+        def make_user_group_request
+          make_request(@user_group_uri)
+        end
+
+        def make_authorization_request 
+          make_request(@authentiction_uri, make_authentication_request_body(@password))
         end
 
         def make_session_request
-          http = Net::HTTP.new(@session_uri.host, @session_uri.port)
-          http.use_ssl = @session_uri.port == 443 || @session_uri.instance_of?(URI::HTTPS)
-          http.verify_mode = OpenSSL::SSL::VERIFY_NONE if http.use_ssl? && @configuration.disable_ssl_verification?
-          http.start do |c|
-            req = Net::HTTP::Post.new("#{@session_uri.path}")
-            req.body = make_session_request_body(@username, @password)
-            req.basic_auth @configuration.crowd_application_name, @configuration.crowd_password
-            req.add_field 'Content-Type', 'text/xml'
-            http.request(req)
-          end
+          make_request(@session_uri, make_session_request_body(@username, @password))
         end
 
         # create the body using Nokogiri so proper encoding of passwords can be ensured

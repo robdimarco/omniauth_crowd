@@ -52,7 +52,7 @@ module OmniAuth
           end
           @crowd_application_name = options[:application_name]
           @crowd_password         = options[:application_password]
-          @use_sessions           = options[:session_based]
+          @use_sessions           = options[:use_sessions]
 
           unless options.include?(:crowd_server_url) || options.include?(:crowd_authentication_url)
             raise ArgumentError.new("Either :crowd_server_url or :crowd_authentication_url MUST be provided")

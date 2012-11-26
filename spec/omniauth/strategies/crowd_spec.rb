@@ -2,7 +2,7 @@ require File.dirname(__FILE__) + '/../../spec_helper'
 
 describe OmniAuth::Strategies::Crowd, :type=>:strategy do
   include OmniAuth::Test::StrategyTestCase
-  @session_based = false
+  @use_sessions = false
   def strategy
     @crowd_server_url ||= 'https://crowd.example.org'
     @application_name ||= 'bogus_app'
@@ -10,7 +10,7 @@ describe OmniAuth::Strategies::Crowd, :type=>:strategy do
     [OmniAuth::Strategies::Crowd, {:crowd_server_url => @crowd_server_url, 
                                     :application_name => @application_name,
                                     :application_password => @application_password,
-                                    :session_based => @session_based}]
+                                    :use_sessions => @use_sessions}]
   end
 
   describe 'GET /auth/crowd' do
@@ -70,7 +70,7 @@ describe OmniAuth::Strategies::Crowd, :type=>:strategy do
 
     context "when using session endpoint" do
       before do
-        @session_based = true
+        @use_sessions = true
         stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/authentication?username=foo").
         to_return(:body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'success.xml')))
         stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session").
@@ -81,7 +81,7 @@ describe OmniAuth::Strategies::Crowd, :type=>:strategy do
       end
 
       after do
-        @session_based = false
+        @use_sessions = false
       end
 
       it 'should call through to the master app' do
