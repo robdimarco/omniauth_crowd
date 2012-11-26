@@ -74,7 +74,7 @@ describe OmniAuth::Strategies::Crowd, :type=>:strategy do
         stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/authentication?username=foo").
         to_return(:body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'success.xml')))
         stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session").
-        to_return(:body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'session.xml')))
+        to_return(:status => 201, :body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'session.xml')))
         stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/user/group/direct?username=foo").
         to_return(:body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'groups.xml')))
         get '/auth/crowd/callback', nil, 'rack.session'=>{'omniauth.crowd'=> {"username"=>"foo", "password"=>"ba"}}
