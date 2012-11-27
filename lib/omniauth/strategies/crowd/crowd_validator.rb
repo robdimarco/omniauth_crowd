@@ -36,7 +36,7 @@ module OmniAuth
         private
         def add_session!(user_info_hash)
           response = make_session_request
-          if response.code.to_i == 201 && response.body 
+          if response.kind_of?(Net::HTTPSuccess) && response.body
             doc = Nokogiri::XML(response.body)
             user_info_hash["sso_token"] = doc.xpath('//token/text()').to_s
           else
