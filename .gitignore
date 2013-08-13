@@ -1,4 +1,5 @@
-.rvmrc
+.ruby-version
+.ruby-gemset
 # rcov generated
 coverage
 
