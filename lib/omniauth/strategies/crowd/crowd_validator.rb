@@ -1,16 +1,17 @@
 require 'nokogiri'
 require 'net/http'
 require 'net/https'
-require 'rexml/text'
 
 module OmniAuth
   module Strategies
     class Crowd
       class CrowdValidator
-        SESSION_REQUEST_BODY = "<authentication-context>
-            <username>%s</username>
-            <password>%s</password>
-            </authentication-context>"
+        SESSION_REQUEST_BODY = <<-BODY.strip
+<authentication-context>
+  <username>%s</username>
+  <password>%s</password>
+</authentication-context>
+BODY
         AUTHENTICATION_REQUEST_BODY = "<password><value>%s</value></password>"
         def initialize(configuration, username, password)
           @configuration, @username, @password = configuration, username, password
@@ -49,16 +50,16 @@ module OmniAuth
 
         def add_user_groups!(user_info_hash)
           response = make_user_group_request
-          unless response.code.to_i != 200 || response.body.nil? || response.body == '' 
+          unless response.code.to_i != 200 || response.body.nil? || response.body == ''
             doc = Nokogiri::XML(response.body)
             user_info_hash["groups"] = doc.xpath("//groups/group/@name").map(&:to_s)
           end
           user_info_hash
         end
-        
+
         def retrieve_user_info!
           response = make_authorization_request
-          unless response.code.to_i != 200 || response.body.nil? || response.body == '' 
+          unless response.code.to_i != 200 || response.body.nil? || response.body == ''
             doc = Nokogiri::XML(response.body)
             {
               "user" => doc.xpath("//user/@name").to_s,
@@ -87,12 +88,12 @@ module OmniAuth
             http.request(req)
           end
         end
-        
+
         def make_user_group_request
           make_request(@user_group_uri)
         end
 
-        def make_authorization_request 
+        def make_authorization_request
           make_request(@authentiction_uri, make_authentication_request_body(@password))
         end
 
@@ -104,14 +105,14 @@ module OmniAuth
         def make_authentication_request_body(password)
           request_body = Nokogiri::XML(AUTHENTICATION_REQUEST_BODY)
           password_value = request_body.at_css "value"
-          password_value.content = REXML::Text.normalize(password)
+          password_value.content = password
           return request_body.root.to_s # return the body without the xml header
         end
 
         def make_session_request_body(username,password)
           request_body = Nokogiri::XML(SESSION_REQUEST_BODY)
-          request_body.at_css("username").content = REXML::Text.normalize(username)
-          request_body.at_css("password").content = REXML::Text.normalize(password)
+          request_body.at_css("username").content = username
+          request_body.at_css("password").content = password
           return request_body.root.to_s
         end
       end
