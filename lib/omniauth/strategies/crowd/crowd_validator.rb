@@ -6,10 +6,12 @@ module OmniAuth
   module Strategies
     class Crowd
       class CrowdValidator
-        SESSION_REQUEST_BODY = "<authentication-context>
-            <username>%s</username>
-            <password>%s</password>
-            </authentication-context>"
+        SESSION_REQUEST_BODY = <<-BODY.strip
+<authentication-context>
+  <username>%s</username>
+  <password>%s</password>
+</authentication-context>
+BODY
         AUTHENTICATION_REQUEST_BODY = "<password><value>%s</value></password>"
         def initialize(configuration, username, password)
           @configuration, @username, @password = configuration, username, password
@@ -48,16 +50,16 @@ module OmniAuth
 
         def add_user_groups!(user_info_hash)
           response = make_user_group_request
-          unless response.code.to_i != 200 || response.body.nil? || response.body == '' 
+          unless response.code.to_i != 200 || response.body.nil? || response.body == ''
             doc = Nokogiri::XML(response.body)
             user_info_hash["groups"] = doc.xpath("//groups/group/@name").map(&:to_s)
           end
           user_info_hash
         end
-        
+
         def retrieve_user_info!
           response = make_authorization_request
-          unless response.code.to_i != 200 || response.body.nil? || response.body == '' 
+          unless response.code.to_i != 200 || response.body.nil? || response.body == ''
             doc = Nokogiri::XML(response.body)
             {
               "user" => doc.xpath("//user/@name").to_s,
@@ -86,12 +88,12 @@ module OmniAuth
             http.request(req)
           end
         end
-        
+
         def make_user_group_request
           make_request(@user_group_uri)
         end
 
-        def make_authorization_request 
+        def make_authorization_request
           make_request(@authentiction_uri, make_authentication_request_body(@password))
         end
 

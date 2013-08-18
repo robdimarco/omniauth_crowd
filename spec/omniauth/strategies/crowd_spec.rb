@@ -7,10 +7,58 @@ describe OmniAuth::Strategies::Crowd, :type=>:strategy do
     @crowd_server_url ||= 'https://crowd.example.org'
     @application_name ||= 'bogus_app'
     @application_password ||= 'bogus_app_password'
-    [OmniAuth::Strategies::Crowd, {:crowd_server_url => @crowd_server_url, 
+    [OmniAuth::Strategies::Crowd, {:crowd_server_url => @crowd_server_url,
                                     :application_name => @application_name,
                                     :application_password => @application_password,
                                     :use_sessions => @use_sessions}]
+  end
+
+  describe 'Authentication Request Body' do
+    before do
+      config = OmniAuth::Strategies::Crowd::Configuration.new(strategy[1])
+      @validator = OmniAuth::Strategies::Crowd::CrowdValidator.new(config, 'foo', 'bar')
+    end
+
+    it 'should send password in session request' do
+      @validator.send(:make_authentication_request_body, 'bar').should == <<-BODY.strip
+<password>
+  <value>bar</value>
+</password>
+BODY
+    end
+
+    it 'should escape special characters username and password in session request' do
+      @validator.send(:make_authentication_request_body, 'bar<').should == <<-BODY.strip
+<password>
+  <value>bar&lt;</value>
+</password>
+BODY
+    end
+  end
+
+  describe 'Session Request Body' do
+    before do
+      config = OmniAuth::Strategies::Crowd::Configuration.new(strategy[1])
+      @validator = OmniAuth::Strategies::Crowd::CrowdValidator.new(config, 'foo', 'bar')
+    end
+
+    it 'should send username and password in session request' do
+      @validator.send(:make_session_request_body, 'foo', 'bar').should == <<-BODY.strip
+<authentication-context>
+  <username>foo</username>
+  <password>bar</password>
+</authentication-context>
+BODY
+    end
+
+    it 'should escape special characters username and password in session request' do
+      @validator.send(:make_session_request_body, 'foo', 'bar<').should == <<-BODY.strip
+<authentication-context>
+  <username>foo</username>
+  <password>bar&lt;</password>
+</authentication-context>
+BODY
+    end
   end
 
   describe 'GET /auth/crowd' do
@@ -87,12 +135,12 @@ describe OmniAuth::Strategies::Crowd, :type=>:strategy do
       it 'should call through to the master app' do
         last_response.body.should == 'true'
       end
-      
+
       it 'should have an auth hash' do
         auth = last_request.env['omniauth.auth']
         auth.should be_kind_of(Hash)
       end
-      
+
       it 'should have good data' do
         auth = last_request.env['omniauth.auth']['provider'].should == :crowd
         auth = last_request.env['omniauth.auth']['uid'].should == 'foo'
