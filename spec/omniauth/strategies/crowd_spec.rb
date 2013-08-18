@@ -1,5 +1,4 @@
 require File.dirname(__FILE__) + '/../../spec_helper'
-require 'nokogiri'
 
 describe OmniAuth::Strategies::Crowd, :type=>:strategy do
   include OmniAuth::Test::StrategyTestCase
@@ -8,10 +7,58 @@ describe OmniAuth::Strategies::Crowd, :type=>:strategy do
     @crowd_server_url ||= 'https://crowd.example.org'
     @application_name ||= 'bogus_app'
     @application_password ||= 'bogus_app_password'
-    [OmniAuth::Strategies::Crowd, {:crowd_server_url => @crowd_server_url, 
+    [OmniAuth::Strategies::Crowd, {:crowd_server_url => @crowd_server_url,
                                     :application_name => @application_name,
                                     :application_password => @application_password,
                                     :use_sessions => @use_sessions}]
+  end
+
+  describe 'Authentication Request Body' do
+    before do
+      config = OmniAuth::Strategies::Crowd::Configuration.new(strategy[1])
+      @validator = OmniAuth::Strategies::Crowd::CrowdValidator.new(config, 'foo', 'bar')
+    end
+
+    it 'should send password in session request' do
+      @validator.send(:make_authentication_request_body, 'bar').should == <<-BODY.strip
+<password>
+  <value>bar</value>
+</password>
+BODY
+    end
+
+    it 'should escape special characters username and password in session request' do
+      @validator.send(:make_authentication_request_body, 'bar<').should == <<-BODY.strip
+<password>
+  <value>bar&lt;</value>
+</password>
+BODY
+    end
+  end
+
+  describe 'Session Request Body' do
+    before do
+      config = OmniAuth::Strategies::Crowd::Configuration.new(strategy[1])
+      @validator = OmniAuth::Strategies::Crowd::CrowdValidator.new(config, 'foo', 'bar')
+    end
+
+    it 'should send username and password in session request' do
+      @validator.send(:make_session_request_body, 'foo', 'bar').should == <<-BODY.strip
+<authentication-context>
+  <username>foo</username>
+  <password>bar</password>
+</authentication-context>
+BODY
+    end
+
+    it 'should escape special characters username and password in session request' do
+      @validator.send(:make_session_request_body, 'foo', 'bar<').should == <<-BODY.strip
+<authentication-context>
+  <username>foo</username>
+  <password>bar&lt;</password>
+</authentication-context>
+BODY
+    end
   end
 
   describe 'GET /auth/crowd' do
@@ -69,18 +116,6 @@ describe OmniAuth::Strategies::Crowd, :type=>:strategy do
       end
     end
 
-    context "when using authentication endpoint with special characters" do
-      before do
-        stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/authentication?username=foo")
-        get '/auth/crowd/callback', nil, 'rack.session'=>{'omniauth.crowd'=> {"username"=>"foo", "password"=>"bar&<xml>"}}
-      end
-
-      it 'should escape special characters' do
-        WebMock.should have_requested(:post, 'https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/authentication?username=foo').
-          with { |req| Nokogiri::XML(req.body).at_css("value").content == 'bar&amp;&lt;xml&gt;' }
-      end
-    end
-
     context "when using session endpoint" do
       before do
         @use_sessions = true
@@ -100,12 +135,12 @@ describe OmniAuth::Strategies::Crowd, :type=>:strategy do
       it 'should call through to the master app' do
         last_response.body.should == 'true'
       end
-      
+
       it 'should have an auth hash' do
         auth = last_request.env['omniauth.auth']
         auth.should be_kind_of(Hash)
       end
-      
+
       it 'should have good data' do
         auth = last_request.env['omniauth.auth']['provider'].should == :crowd
         auth = last_request.env['omniauth.auth']['uid'].should == 'foo'
@@ -113,23 +148,6 @@ describe OmniAuth::Strategies::Crowd, :type=>:strategy do
         auth = last_request.env['omniauth.auth']['user_info']['sso_token'].should == 'rtk8eMvqq00EiGn5iJCMZQ00'
         auth = last_request.env['omniauth.auth']['user_info']['groups'].sort.should == ["Developers", "jira-users"].sort
       end
-    end
-  end
-
-  context "when using session endpoint with special characters" do
-    before do
-      @use_sessions = true
-      stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/authentication?username=foo%26%3Cxml%3E").
-      to_return(:body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'success.xml')))
-      stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session").
-      to_return(:status => 201, :body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'session.xml')))
-      stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/user/group/direct?username=foo%26%3Cxml%3E").
-      to_return(:body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'groups.xml')))
-      get '/auth/crowd/callback', nil, 'rack.session'=>{'omniauth.crowd'=> {"username"=>"foo&<xml>", "password"=>"bar&<xml>"}}
-    end
-    it 'should escape special characters' do
-      WebMock.should have_requested(:post, 'https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session').
-        with { |req| Nokogiri::XML(req.body).at_css("username").content == 'foo&amp;&lt;xml&gt;' and Nokogiri::XML(req.body).at_css("password").content == 'bar&amp;&lt;xml&gt;' }
     end
   end
 
