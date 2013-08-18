@@ -1,5 +1,4 @@
 require File.dirname(__FILE__) + '/../../spec_helper'
-require 'nokogiri'
 
 describe OmniAuth::Strategies::Crowd, :type=>:strategy do
   include OmniAuth::Test::StrategyTestCase
@@ -69,18 +68,6 @@ describe OmniAuth::Strategies::Crowd, :type=>:strategy do
       end
     end
 
-    context "when using authentication endpoint with special characters" do
-      before do
-        stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/authentication?username=foo")
-        get '/auth/crowd/callback', nil, 'rack.session'=>{'omniauth.crowd'=> {"username"=>"foo", "password"=>"bar&<xml>"}}
-      end
-
-      it 'should escape special characters' do
-        WebMock.should have_requested(:post, 'https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/authentication?username=foo').
-          with { |req| Nokogiri::XML(req.body).at_css("value").content == 'bar&amp;&lt;xml&gt;' }
-      end
-    end
-
     context "when using session endpoint" do
       before do
         @use_sessions = true
@@ -113,23 +100,6 @@ describe OmniAuth::Strategies::Crowd, :type=>:strategy do
         auth = last_request.env['omniauth.auth']['user_info']['sso_token'].should == 'rtk8eMvqq00EiGn5iJCMZQ00'
         auth = last_request.env['omniauth.auth']['user_info']['groups'].sort.should == ["Developers", "jira-users"].sort
       end
-    end
-  end
-
-  context "when using session endpoint with special characters" do
-    before do
-      @use_sessions = true
-      stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/authentication?username=foo%26%3Cxml%3E").
-      to_return(:body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'success.xml')))
-      stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session").
-      to_return(:status => 201, :body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'session.xml')))
-      stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/user/group/direct?username=foo%26%3Cxml%3E").
-      to_return(:body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'groups.xml')))
-      get '/auth/crowd/callback', nil, 'rack.session'=>{'omniauth.crowd'=> {"username"=>"foo&<xml>", "password"=>"bar&<xml>"}}
-    end
-    it 'should escape special characters' do
-      WebMock.should have_requested(:post, 'https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session').
-        with { |req| Nokogiri::XML(req.body).at_css("username").content == 'foo&amp;&lt;xml&gt;' and Nokogiri::XML(req.body).at_css("password").content == 'bar&amp;&lt;xml&gt;' }
     end
   end
 

@@ -1,7 +1,6 @@
 require 'nokogiri'
 require 'net/http'
 require 'net/https'
-require 'rexml/text'
 
 module OmniAuth
   module Strategies
@@ -104,14 +103,14 @@ module OmniAuth
         def make_authentication_request_body(password)
           request_body = Nokogiri::XML(AUTHENTICATION_REQUEST_BODY)
           password_value = request_body.at_css "value"
-          password_value.content = REXML::Text.normalize(password)
+          password_value.content = password
           return request_body.root.to_s # return the body without the xml header
         end
 
         def make_session_request_body(username,password)
           request_body = Nokogiri::XML(SESSION_REQUEST_BODY)
-          request_body.at_css("username").content = REXML::Text.normalize(username)
-          request_body.at_css("password").content = REXML::Text.normalize(password)
+          request_body.at_css("username").content = username
+          request_body.at_css("password").content = password
           return request_body.root.to_s
         end
       end
