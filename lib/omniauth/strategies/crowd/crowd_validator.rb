@@ -84,7 +84,6 @@ BODY
             req = http_method.new(uri.query.nil? ? uri.path : "#{uri.path}?#{uri.query}")
             req.body = body if body
             req.basic_auth @configuration.crowd_application_name, @configuration.crowd_password
-            req.add_field 'Content-Type', 'text/xml'
             http.request(req)
           end
         end
