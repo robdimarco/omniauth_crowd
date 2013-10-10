@@ -117,8 +117,8 @@ BODY
         auth = last_request.env['omniauth.auth']
         auth['provider'].should == :crowd
         auth['uid'].should == 'foo'
-        auth['user_info'].should be_kind_of(Hash)
-        auth['user_info']['groups'].sort.should == ["Developers", "jira-users"].sort
+        auth['info'].should be_kind_of(Hash)
+        auth['info']['groups'].sort.should == ["Developers", "jira-users"].sort
       end
     end
 
@@ -151,9 +151,9 @@ BODY
         auth = last_request.env['omniauth.auth']
         auth['provider'].should == :crowd
         auth['uid'].should == 'foo'
-        auth['user_info'].should be_kind_of(Hash)
-        auth['user_info']['sso_token'].should == 'rtk8eMvqq00EiGn5iJCMZQ00'
-        auth['user_info']['groups'].sort.should == ["Developers", "jira-users"].sort
+        auth['info'].should be_kind_of(Hash)
+        auth['info']['sso_token'].should == 'rtk8eMvqq00EiGn5iJCMZQ00'
+        auth['info']['groups'].sort.should == ["Developers", "jira-users"].sort
       end
     end
   end
