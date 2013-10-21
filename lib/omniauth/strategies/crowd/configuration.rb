@@ -7,12 +7,12 @@ module OmniAuth
         DEFAULT_SESSION_URL = "%s/rest/usermanagement/latest/session"
         DEFAULT_AUTHENTICATION_URL = "%s/rest/usermanagement/latest/authentication"
         DEFAULT_USER_GROUP_URL = "%s/rest/usermanagement/latest/user/group/direct"
-        attr_reader :crowd_application_name, :crowd_password, :disable_ssl_verification, :include_users_groups, :use_sessions, :session_url
+        attr_reader :crowd_application_name, :crowd_password, :disable_ssl_verification, :include_users_groups, :use_sessions, :session_url, :content_type
 
         alias :"disable_ssl_verification?" :disable_ssl_verification
         alias :"include_users_groups?" :include_users_groups
         alias :"use_sessions?" :use_sessions
-        
+
         # @param [Hash] params configuration options
         # @option params [String, nil] :crowd_server_url the Crowd server root URL; probably something like
         #         `https://crowd.mycompany.com` or `https://crowd.mycompany.com/crowd`; optional.
@@ -33,17 +33,17 @@ module OmniAuth
 
         # Build a Crowd authentication URL from +username+.
         #
-        # @param [String] username the username to validate 
-        # 
+        # @param [String] username the username to validate
+        #
         # @return [String] a URL like `https://crowd.myhost.com/crowd/rest/usermanagement/latest/authentication?username=USERNAME`
         def authentication_url(username)
           append_username @authentication_url, username
         end
-        
+
         def user_group_url(username)
           @user_group_url.nil? ? nil : append_username( @user_group_url, username)
         end
-        
+
         private
         def parse_params(options)
           options= {:include_user_groups => true}.merge(options || {})
@@ -53,6 +53,7 @@ module OmniAuth
           @crowd_application_name = options[:application_name]
           @crowd_password         = options[:application_password]
           @use_sessions           = options[:use_sessions]
+          @content_type           = options[:content_type]
 
           unless options.include?(:crowd_server_url) || options.include?(:crowd_authentication_url)
             raise ArgumentError.new("Either :crowd_server_url or :crowd_authentication_url MUST be provided")
@@ -92,7 +93,7 @@ module OmniAuth
           result << 'username='
           result << Rack::Utils.escape(username)
         end
-        
+
       end
     end
   end
