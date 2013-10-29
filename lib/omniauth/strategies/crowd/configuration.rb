@@ -7,6 +7,8 @@ module OmniAuth
         DEFAULT_SESSION_URL = "%s/rest/usermanagement/latest/session"
         DEFAULT_AUTHENTICATION_URL = "%s/rest/usermanagement/latest/authentication"
         DEFAULT_USER_GROUP_URL = "%s/rest/usermanagement/latest/user/group/direct"
+        DEFAULT_CONTENT_TYPE = 'application/xml'
+
         attr_reader :crowd_application_name, :crowd_password, :disable_ssl_verification, :include_users_groups, :use_sessions, :session_url, :content_type
 
         alias :"disable_ssl_verification?" :disable_ssl_verification
@@ -53,7 +55,7 @@ module OmniAuth
           @crowd_application_name = options[:application_name]
           @crowd_password         = options[:application_password]
           @use_sessions           = options[:use_sessions]
-          @content_type           = options[:content_type]
+          @content_type           = options[:content_type] || DEFAULT_CONTENT_TYPE
 
           unless options.include?(:crowd_server_url) || options.include?(:crowd_authentication_url)
             raise ArgumentError.new("Either :crowd_server_url or :crowd_authentication_url MUST be provided")
