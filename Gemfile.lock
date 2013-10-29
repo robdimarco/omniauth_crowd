@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    omniauth_crowd (2.2.0)
+    omniauth_crowd (2.2.1)
       nokogiri (>= 1.4.4)
       omniauth (~> 1.0)
 
