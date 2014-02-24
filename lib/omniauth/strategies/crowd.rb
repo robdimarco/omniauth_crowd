@@ -8,6 +8,7 @@ module OmniAuth
       autoload :Configuration, 'omniauth/strategies/crowd/configuration'
       autoload :CrowdValidator, 'omniauth/strategies/crowd/crowd_validator'
       def initialize(app, options = {}, &block)
+        options.symbolize_keys!()
         super(app, {:name=> :crowd}.merge(options), &block)
         @configuration = OmniAuth::Strategies::Crowd::Configuration.new(options)
       end
