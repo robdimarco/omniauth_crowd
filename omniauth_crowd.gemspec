@@ -1,5 +1,7 @@
 # -*- encoding: utf-8 -*-
 require File.expand_path('../lib/omniauth_crowd/version', __FILE__)
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |gem|
   gem.authors = ["Robert Di Marco"]
@@ -20,7 +22,7 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency(%q<rack>, [">= 0"])
   gem.add_development_dependency(%q<rake>, [">= 0"])
   gem.add_development_dependency(%q<rack-test>, [">= 0"])
-  gem.add_development_dependency(%q<rspec>, ["~> 2.5.0"])
-  gem.add_development_dependency(%q<webmock>, ["~> 1.3.4"])
+  gem.add_development_dependency(%q<rspec>, ["~> 3.0.0"])
+  gem.add_development_dependency(%q<webmock>)
   gem.add_development_dependency(%q<bundler>, ["> 1.0.0"])
 end
