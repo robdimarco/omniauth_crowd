@@ -137,7 +137,7 @@ BODY
 
       it 'should have good data' do
         get '/auth/crowd/callback', nil, 'rack.session'=>{'omniauth.crowd'=> {"username"=>"foo", "password"=>"ba"}}
-        puts last_request.env['omniauth.auth']
+        auth = last_request.env['omniauth.auth']
         expect(auth['provider']).to eq(:crowd)
         expect(auth['uid']).to eq('foo')
         expect(auth['info']).to be_kind_of(Hash)

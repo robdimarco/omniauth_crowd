@@ -2,18 +2,28 @@ PATH
   remote: .
   specs:
     omniauth_crowd (2.2.2)
+      activesupport
       nokogiri (>= 1.4.4)
       omniauth (~> 1.0)
 
 GEM
   remote: http://rubygems.org/
   specs:
+    activesupport (4.1.4)
+      i18n (~> 0.6, >= 0.6.9)
+      json (~> 1.7, >= 1.7.7)
+      minitest (~> 5.1)
+      thread_safe (~> 0.1)
+      tzinfo (~> 1.1)
     addressable (2.3.6)
     crack (0.4.2)
       safe_yaml (~> 1.0.0)
     diff-lcs (1.2.5)
     hashie (3.2.0)
+    i18n (0.6.11)
+    json (1.8.1)
     mini_portile (0.6.0)
+    minitest (5.4.0)
     nokogiri (1.6.3.1)
       mini_portile (= 0.6.0)
     omniauth (1.2.2)
@@ -36,6 +46,9 @@ GEM
       rspec-support (~> 3.0.0)
     rspec-support (3.0.3)
     safe_yaml (1.0.3)
+    thread_safe (0.3.4)
+    tzinfo (1.2.1)
+      thread_safe (~> 0.1)
     webmock (1.18.0)
       addressable (>= 2.3.6)
       crack (>= 0.3.2)
