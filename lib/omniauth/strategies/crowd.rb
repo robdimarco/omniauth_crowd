@@ -19,6 +19,8 @@ module OmniAuth
       def request_phase
         if env['REQUEST_METHOD'] == 'GET'
           get_credentials
+        elsif (env['REQUEST_METHOD'] == 'POST') && (not request.params['username'])
+          get_credentials
         else
           session['omniauth.crowd'] = {'username' => request['username'], 'password' => request['password']}
           redirect callback_url
