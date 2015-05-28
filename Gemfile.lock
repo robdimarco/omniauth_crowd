@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    omniauth_crowd (2.2.2)
+    omniauth_crowd (2.2.3)
       activesupport
       nokogiri (>= 1.4.4)
       omniauth (~> 1.0)
@@ -47,7 +47,7 @@ GEM
     rspec-support (3.0.3)
     safe_yaml (1.0.3)
     thread_safe (0.3.4)
-    tzinfo (1.2.1)
+    tzinfo (1.2.2)
       thread_safe (~> 0.1)
     webmock (1.18.0)
       addressable (>= 2.3.6)
