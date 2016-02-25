@@ -150,7 +150,7 @@ BODY
   describe 'GET /auth/crowd/callback with credentials will fail' do
     before do
       stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/authentication?username=foo").
-      to_return(:code=>400)
+      to_return(:status=>400)
       get '/auth/crowd/callback', nil, 'rack.session'=>{'omniauth.crowd'=> {"username"=>"foo", "password"=>"ba"}}
     end
     it 'should fail' do
