@@ -7,8 +7,8 @@ module OmniAuth
     class Crowd
       class CrowdValidator
         AUTHENTICATION_REQUEST_BODY = "<password><value>%s</value></password>"
-        def initialize(configuration, username, password, tokens: nil, client_ip: nil)
-          @configuration, @username, @password, @tokens, @client_ip = configuration, username, password, tokens, client_ip
+        def initialize(configuration, username, password, client_ip, tokens)
+          @configuration, @username, @password, @client_ip, @tokens = configuration, username, password, client_ip, tokens
           @authentiction_uri = URI.parse(@configuration.authentication_url(@username))
           @session_uri       = URI.parse(@configuration.session_url) if @configuration.use_sessions
         end
@@ -114,7 +114,7 @@ module OmniAuth
 
         def make_authorization_request
 
-          if @configuration.use_sessions? && @tokens
+          if @configuration.use_sessions? && @tokens.kind_of?(Array)
             make_session_retrieval_request
           else 
             make_request(@authentiction_uri, make_authentication_request_body(@password))

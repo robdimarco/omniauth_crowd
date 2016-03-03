@@ -19,7 +19,7 @@ describe OmniAuth::Strategies::Crowd, :type=>:strategy do
   @sso_url = nil
   @sso_url_image = nil
   let(:config) { OmniAuth::Strategies::Crowd::Configuration.new(strategy[1]) }
-  let(:validator) { OmniAuth::Strategies::Crowd::CrowdValidator.new(config, 'foo', 'bar') }
+  let(:validator) { OmniAuth::Strategies::Crowd::CrowdValidator.new(config, 'foo', 'bar', nil, nil) }
 
   describe 'Authentication Request Body' do
 

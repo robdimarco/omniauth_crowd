@@ -71,12 +71,12 @@ module OmniAuth
 
         unless creds
           if @configuration.use_sso? && request.cookies[@configuration.session_cookie]
-            validator = CrowdValidator.new(@configuration, username, password, tokens: get_sso_tokens, client_ip: get_client_ip)
+            validator = CrowdValidator.new(@configuration, username, password, get_client_ip, get_sso_tokens)
           else
-            return fail!(:no_credentials)            
+            return fail!(:no_credentials)
           end
         else
-          validator = CrowdValidator.new(@configuration, username, password, client_ip: get_client_ip)
+          validator = CrowdValidator.new(@configuration, username, password, get_client_ip, nil)
         end
 
         @user_info = validator.user_info
