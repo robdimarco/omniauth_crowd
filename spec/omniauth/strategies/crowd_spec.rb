@@ -9,12 +9,17 @@ describe OmniAuth::Strategies::Crowd, :type=>:strategy do
     [OmniAuth::Strategies::Crowd, {:crowd_server_url => @crowd_server_url,
                                     :application_name => @application_name,
                                     :application_password => @application_password,
-                                    :use_sessions => @using_sessions}]
+                                    :use_sessions => @using_sessions,
+                                    :sso_url => @sso_url,
+                                    :sso_url_image => @sso_url_image
+     }]
   end
 
   @using_sessions = false
+  @sso_url = nil
+  @sso_url_image = nil
   let(:config) { OmniAuth::Strategies::Crowd::Configuration.new(strategy[1]) }
-  let(:validator) { OmniAuth::Strategies::Crowd::CrowdValidator.new(config, 'foo', 'bar') }
+  let(:validator) { OmniAuth::Strategies::Crowd::CrowdValidator.new(config, 'foo', 'bar', nil, nil) }
 
   describe 'Authentication Request Body' do
 
@@ -34,28 +39,6 @@ BODY
 </password>
 BODY
       expect(validator.send(:make_authentication_request_body, 'bar<')).to eq(body)
-    end
-  end
-
-  describe 'Session Request Body' do
-    it 'should send username and password in session request' do
-      body = <<-BODY.strip
-<authentication-context>
-  <username>foo</username>
-  <password>bar</password>
-</authentication-context>
-BODY
-      expect(validator.send(:make_session_request_body, 'foo', 'bar')).to eq(body)
-    end
-
-    it 'should escape special characters username and password in session request' do
-      body = <<-BODY.strip
-<authentication-context>
-  <username>foo</username>
-  <password>bar&lt;</password>
-</authentication-context>
-BODY
-      expect(validator.send(:make_session_request_body, 'foo', 'bar<')).to eq(body)
     end
   end
 
@@ -157,5 +140,248 @@ BODY
       expect(last_response).to be_redirect
       expect(last_response.headers['Location']).to match(/invalid_credentials/)
     end
+  end
+
+  describe 'GET /auth/crowd without credentials will redirect to login form' do
+    
+    sso_url = 'https://foo.bar'
+
+    before do
+      @using_sessions = true
+      @sso_url = sso_url
+    end
+
+    it 'should have the SSO button in the response body' do
+
+      found_legend = found_anchor = nil
+
+      get '/auth/crowd'
+
+      Nokogiri::HTML(last_response.body).xpath('//html/body/form/fieldset/*').each do |element|
+
+        if element.name === 'legend' && element.content() === 'SSO'
+          found_legend = true
+        elsif element.name === 'a' && element.attr('href') === "#{sso_url}/users/auth/crowd/callback"
+          found_anchor = true
+        end        
+      end
+
+      expect(found_legend).to(be(true))
+      expect(found_anchor).to(be(true))
+
+    end
+
+    after do
+      @using_sessions = false
+      @sso_url = nil
+    end
+
+  end
+  
+  describe 'GET /auth/crowd without credentials will redirect to login form which has custom image in the SSO link' do
+    
+    sso_url = 'https://foo.bar'
+    sso_url_image = 'https://foo.bar/image.png'
+    
+    before do
+      @using_sessions = true
+      @sso_url = sso_url
+      @sso_url_image = 'https://foo.bar/image.png'
+    end
+
+    it 'should have the SSO button with a custom image in the response body' do
+
+      found_legend = found_anchor = found_image = false
+
+      get '/auth/crowd'
+
+      Nokogiri::HTML(last_response.body).xpath('//html/body/form/fieldset/*').each do |element|
+
+        if element.name === 'legend' && element.content() === 'SSO'
+          found_legend = true
+        elsif element.name === 'a' && element.attr('href') === "#{sso_url}/users/auth/crowd/callback"
+
+          found_anchor = true
+
+          if element.children.length === 1 && element.children.first.name === 'img' && element.children.first.attr('src') === sso_url_image
+            found_image = true
+          end
+
+        end
+      end
+
+      expect(found_legend).to(be(true))
+      expect(found_anchor).to(be(true))
+      expect(found_image).to(be(true))
+
+    end
+
+    after do
+      @using_sessions = false
+      @sso_url = nil
+      @sso_url_image = nil
+    end
+
+  end
+
+  describe 'GET /auth/crowd without credentials but with SSO cookie will redirect to callback' do
+    
+    sso_url = 'https://foo.bar'
+    
+    before do
+      
+      @using_sessions = true
+      @sso_url = sso_url
+
+      set_cookie('crowd.token_key=foobar')
+
+    end
+
+    it 'should redirect to callback' do
+      get '/auth/crowd'
+      expect(last_response).to be_redirect
+      expect(last_response.headers['Location']).to eq('http://example.org/auth/crowd/callback')
+    end
+
+    after do
+
+      @using_sessions = false
+      @sso_url = nil
+
+      clear_cookies()
+
+    end
+
+  end
+  
+  describe 'POST /auth/crowd/callback without credentials but with SSO cookie will redirect to login form because session is invalid' do
+    
+    sso_url = 'https://foo.bar'
+    token = 'foobar'
+    
+    before do
+      
+      @using_sessions = true
+      @sso_url = sso_url
+
+      stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session/#{token}").
+          to_return(:status => [404])
+
+      set_cookie("crowd.token_key=#{token}")
+
+    end
+
+    it 'should redirect to login form' do
+      post '/auth/crowd/callback'
+      expect(last_response).to be_redirect
+      expect(last_response.headers['Location']).to match(/invalid_credentials/)
+    end
+
+    after do
+
+      @using_sessions = false
+      @sso_url = nil
+
+      clear_cookies()
+
+    end
+
+  end
+  
+  describe 'GET /auth/crowd/callback without credentials but with SSO cookie will succeed' do
+
+    sso_url = 'https://foo.bar'
+    token = 'rtk8eMvqq00EiGn5iJCMZQ00'
+    
+    before do
+      
+      @using_sessions = true
+      @sso_url = sso_url
+
+      stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session/#{token}").
+        to_return(:status => 200, :body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'session.xml')))
+      stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session/#{token}").
+        to_return(:status => 200)
+      stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/user/group/direct?username=foo").
+        to_return(:body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'groups.xml')))
+      
+      set_cookie("crowd.token_key=#{token}")
+
+    end
+
+    it 'should return user data' do
+
+      auth = nil
+
+      get '/auth/crowd/callback'
+
+      auth = last_request.env['omniauth.auth']
+
+      expect(auth['provider']).to eq(:crowd)
+      expect(auth['uid']).to eq('foo')
+      expect(auth['info']).to be_kind_of(Hash)
+      expect(auth['info']['groups'].sort).to eq(["Developers", "jira-users"].sort)
+
+    end
+
+    after do
+
+      @using_sessions = false
+      @sso_url = nil
+
+      clear_cookies()
+
+    end
+
+  end
+
+  describe 'GET /auth/crowd/callback without credentials but with multiple SSO cookies will succeed because one of them is valid' do
+
+    sso_url = 'https://foo.bar'
+    
+    before do
+      
+      @using_sessions = true
+      @sso_url = sso_url
+
+      stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session/foo").
+        to_return(:status => 404)
+      stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session/fubar").
+        to_return(:status => 404)
+      stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session/rtk8eMvqq00EiGn5iJCMZQ00").
+        to_return(:status => 200, :body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'session.xml')))
+      stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session/rtk8eMvqq00EiGn5iJCMZQ00").
+        to_return(:status => 200)
+      stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/user/group/direct?username=foo").
+        to_return(:body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'groups.xml')))
+
+      header('Cookie', "crowd.token_key=foo;crowd.token_key=rtk8eMvqq00EiGn5iJCMZQ00;crowd.token_key=fubar")
+
+    end
+
+    it 'should return user data' do
+
+      auth = nil
+
+      get '/auth/crowd/callback'
+
+      auth = last_request.env['omniauth.auth']
+
+      expect(auth['provider']).to eq(:crowd)
+      expect(auth['uid']).to eq('foo')
+      expect(auth['info']).to be_kind_of(Hash)
+      expect(auth['info']['groups'].sort).to eq(["Developers", "jira-users"].sort)
+
+    end
+
+    after do
+
+      @using_sessions = false
+      @sso_url = nil
+
+      header('Cookie', nil)
+
+    end
+
   end
 end

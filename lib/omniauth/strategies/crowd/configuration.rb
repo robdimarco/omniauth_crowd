@@ -8,8 +8,9 @@ module OmniAuth
         DEFAULT_AUTHENTICATION_URL = "%s/rest/usermanagement/latest/authentication"
         DEFAULT_USER_GROUP_URL = "%s/rest/usermanagement/latest/user/group/direct"
         DEFAULT_CONTENT_TYPE = 'application/xml'
+        DEFAULT_SESSION_COOKIE = 'crowd.token_key'
 
-        attr_reader :crowd_application_name, :crowd_password, :disable_ssl_verification, :include_users_groups, :use_sessions, :session_url, :content_type
+        attr_reader :crowd_application_name, :crowd_password, :disable_ssl_verification, :include_users_groups, :use_sessions, :session_url, :content_type, :session_cookie, :sso_url, :sso_url_image
 
         alias :"disable_ssl_verification?" :disable_ssl_verification
         alias :"include_users_groups?" :include_users_groups
@@ -29,6 +30,10 @@ module OmniAuth
         # @option params [String, nil] :crowd_user_group_url (:crowd_server_url + '/rest/usermanagement/latest/user/group/direct') the URL to which to
         #         use for retrieving users groups optional if `:crowd_server_url` is specified, or if `:include_user_groups` is false
         #         required otherwise.
+        # @option params [Boolean, false] :use_sessions Use Crowd sessions. If the user logins with user and password create a new Crowd session. Update the session if only a session token is sent (Cookie name set by option session_cookie)
+        # @option params [String, 'crowd.token_key'] :session_cookie Session cookie name. Defaults to: 'crowd.token_key'
+        # @option params [String, nil] :sso_url URL of the external SSO page. If this parameter is defined the login form will have a link which will redirect to the SSO page. The SSO must return to the URL of the page using omniauth_crowd (Path portion '/users/auth/crowd/callback' is appended to the URL)
+        # @option params [String, nil] :sso_url_image Optional image URL to be used in SSO link in the login form
         def initialize(params)
           parse_params params
         end
@@ -46,6 +51,10 @@ module OmniAuth
           @user_group_url.nil? ? nil : append_username( @user_group_url, username)
         end
 
+        def use_sso?()
+          @use_sessions && @sso_url ? true : false
+        end
+
         private
         def parse_params(options)
           options= {:include_user_groups => true}.merge(options || {})
@@ -56,6 +65,9 @@ module OmniAuth
           @crowd_password         = options[:application_password]
           @use_sessions           = options[:use_sessions]
           @content_type           = options[:content_type] || DEFAULT_CONTENT_TYPE
+          @session_cookie         = options[:session_cookie] || DEFAULT_SESSION_COOKIE
+          @sso_url                = options[:sso_url]
+          @sso_url_image          = options[:sso_url_image]
 
           unless options.include?(:crowd_server_url) || options.include?(:crowd_authentication_url)
             raise ArgumentError.new("Either :crowd_server_url or :crowd_authentication_url MUST be provided")
