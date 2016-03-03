@@ -3,6 +3,7 @@ Bundler.setup
 require 'rack/test'
 require 'webmock'
 require 'webmock/rspec'
+require 'nokogiri'
 
 require 'omniauth_crowd'
 RSpec.configure do |config|
