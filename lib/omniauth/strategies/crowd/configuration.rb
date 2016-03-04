@@ -51,10 +51,6 @@ module OmniAuth
           @user_group_url.nil? ? nil : append_username( @user_group_url, username)
         end
 
-        def use_sso?()
-          @use_sessions && @sso_url ? true : false
-        end
-
         private
         def parse_params(options)
           options= {:include_user_groups => true}.merge(options || {})

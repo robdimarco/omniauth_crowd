@@ -19,7 +19,7 @@ module OmniAuth
       def request_phase
         if env['REQUEST_METHOD'] == 'GET'
 
-          if @configuration.use_sso? && request.cookies[@configuration.session_cookie]
+          if @configuration.use_sessions? && request.cookies[@configuration.session_cookie]
             redirect callback_url
           else            
             get_credentials
@@ -53,7 +53,7 @@ module OmniAuth
           text_field 'Login', 'username'
           password_field 'Password', 'password'
 
-          if configuration.use_sso? && configuration.sso_url
+          if configuration.use_sessions? && configuration.sso_url
             fieldset 'SSO' do
               html "<a href=\"#{configuration.sso_url}/users/auth/crowd/callback\">" + (configuration.sso_url_image ? "<img src=\"#{configuration.sso_url_image}\" />" : '') + "</a>"
             end
@@ -70,7 +70,7 @@ module OmniAuth
         password = creds.nil? ? nil : creds['password']
 
         unless creds
-          if @configuration.use_sso? && request.cookies[@configuration.session_cookie]
+          if @configuration.use_sessions? && request.cookies[@configuration.session_cookie]
             validator = CrowdValidator.new(@configuration, username, password, get_client_ip, get_sso_tokens)
           else
             return fail!(:no_credentials)
