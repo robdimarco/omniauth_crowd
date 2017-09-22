@@ -68,14 +68,14 @@ BODY
   describe 'GET /auth/crowd/callback with credentials can be successful' do
     context "when using authentication endpoint" do
       before do
-        stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/authentication?username=foo").
+        stub_request(:post, "https://crowd.example.org/rest/usermanagement/latest/authentication?username=foo").
         to_return(:body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'success.xml')))
 
-        stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/user/group/direct?username=foo").
+        stub_request(:get, "https://crowd.example.org/rest/usermanagement/latest/user/group/direct?username=foo").
             to_return(:body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'groups.xml')))
 
         #Adding this to prevent Content-Type text/xml from being added back in the future
-        stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/user/group/direct?username=foo").with(:headers => {"Content-Type" => "text/xml"}).
+        stub_request(:get, "https://crowd.example.org/rest/usermanagement/latest/user/group/direct?username=foo").with(:headers => {"Content-Type" => "text/xml"}).
             to_return(:status => [415, "Unsupported Media Type"])
         get '/auth/crowd/callback', nil, 'rack.session'=>{'omniauth.crowd'=> {"username"=>"foo", "password"=>"ba"}}
       end
@@ -98,11 +98,11 @@ BODY
     describe "when using session endpoint" do
       before do
         @using_sessions = true
-        stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/authentication?username=foo").
+        stub_request(:post, "https://crowd.example.org/rest/usermanagement/latest/authentication?username=foo").
           to_return(:body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'success.xml')))
-        stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session").
+        stub_request(:post, "https://crowd.example.org/rest/usermanagement/latest/session").
           to_return(:status => 201, :body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'session.xml')))
-        stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/user/group/direct?username=foo").
+        stub_request(:get, "https://crowd.example.org/rest/usermanagement/latest/user/group/direct?username=foo").
           to_return(:body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'groups.xml')))
       end
 
@@ -132,7 +132,7 @@ BODY
 
   describe 'GET /auth/crowd/callback with credentials will fail' do
     before do
-      stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/authentication?username=foo").
+      stub_request(:post, "https://crowd.example.org/rest/usermanagement/latest/authentication?username=foo").
       to_return(:status=>400)
       get '/auth/crowd/callback', nil, 'rack.session'=>{'omniauth.crowd'=> {"username"=>"foo", "password"=>"ba"}}
     end
@@ -264,7 +264,7 @@ BODY
       @using_sessions = true
       @sso_url = sso_url
 
-      stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session/#{token}").
+      stub_request(:get, "https://crowd.example.org/rest/usermanagement/latest/session/#{token}").
           to_return(:status => [404])
 
       set_cookie("crowd.token_key=#{token}")
@@ -298,11 +298,11 @@ BODY
       @using_sessions = true
       @sso_url = sso_url
 
-      stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session/#{token}").
+      stub_request(:get, "https://crowd.example.org/rest/usermanagement/latest/session/#{token}").
         to_return(:status => 200, :body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'session.xml')))
-      stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session/#{token}").
+      stub_request(:post, "https://crowd.example.org/rest/usermanagement/latest/session/#{token}").
         to_return(:status => 200)
-      stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/user/group/direct?username=foo").
+      stub_request(:get, "https://crowd.example.org/rest/usermanagement/latest/user/group/direct?username=foo").
         to_return(:body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'groups.xml')))
       
       set_cookie("crowd.token_key=#{token}")
@@ -344,15 +344,15 @@ BODY
       @using_sessions = true
       @sso_url = sso_url
 
-      stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session/foo").
+      stub_request(:get, "https://crowd.example.org/rest/usermanagement/latest/session/foo").
         to_return(:status => 404)
-      stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session/fubar").
+      stub_request(:get, "https://crowd.example.org/rest/usermanagement/latest/session/fubar").
         to_return(:status => 404)
-      stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session/rtk8eMvqq00EiGn5iJCMZQ00").
+      stub_request(:get, "https://crowd.example.org/rest/usermanagement/latest/session/rtk8eMvqq00EiGn5iJCMZQ00").
         to_return(:status => 200, :body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'session.xml')))
-      stub_request(:post, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/session/rtk8eMvqq00EiGn5iJCMZQ00").
+      stub_request(:post, "https://crowd.example.org/rest/usermanagement/latest/session/rtk8eMvqq00EiGn5iJCMZQ00").
         to_return(:status => 200)
-      stub_request(:get, "https://bogus_app:bogus_app_password@crowd.example.org/rest/usermanagement/latest/user/group/direct?username=foo").
+      stub_request(:get, "https://crowd.example.org/rest/usermanagement/latest/user/group/direct?username=foo").
         to_return(:body => File.read(File.join(File.dirname(__FILE__), '..', '..', 'fixtures', 'groups.xml')))
 
       header('Cookie', "crowd.token_key=foo;crowd.token_key=rtk8eMvqq00EiGn5iJCMZQ00;crowd.token_key=fubar")
