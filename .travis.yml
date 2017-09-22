@@ -1,6 +1,7 @@
 language: ruby
 before_install:
-  - gem install bundler --path vendor/bundle
+  - gem install bundler 
+  - bundle install --path vendor/bundle
 script:
   - bundle exec rspec
 rvm:
