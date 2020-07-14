@@ -31,7 +31,7 @@ GEM
       hashie (>= 1.2, < 4)
       rack (>= 1.0, < 3)
     public_suffix (3.0.0)
-    rack (1.6.4)
+    rack (2.2.3)
     rack-test (0.6.3)
       rack (>= 1.0)
     rake (10.5.0)
