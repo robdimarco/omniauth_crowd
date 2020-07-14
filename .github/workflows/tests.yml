@@ -3,7 +3,7 @@ on: [push]
 jobs:
   test:
     name: Automated Tests
-    runs-on: ubuntu
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - uses: actions/setup-ruby@v1
