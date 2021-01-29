@@ -6,8 +6,8 @@ The omniauth_crowd library is an OmniAuth provider that supports authentication 
 
 ## Helpful links
 
-*	[Documentation](http://github.com/robdimarco/omniauth_crow)
-*	[OmniAuth](https://github.com/intridea/omniauth/)
+* [Documentation](http://github.com/robdimarco/omniauth_crowd)
+* [OmniAuth](https://github.com/intridea/omniauth/)
 * [Atlassian Crowd](http://www.atlassian.com/software/crowd/)
 * [Atlassian Crowd REST API](http://confluence.atlassian.com/display/CROWDDEV/Crowd+REST+APIs)
 
